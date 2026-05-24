@@ -3,6 +3,9 @@ const App = {
 
   init() {
     Toast.init();
+    if (window.APP_CONFIG?.apiConfigured === false) {
+      console.warn('APP_CONFIG.apiConfigured is false — set API_BASE_URL on Netlify');
+    }
     window.addEventListener('hashchange', () => this.route());
     this.route();
   },

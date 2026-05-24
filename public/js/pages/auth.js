@@ -24,6 +24,9 @@ const AuthPage = {
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
             <p class="auth-switch">Don't have an account? <a href="#/register">Register</a></p>
           </form>
+          <div class="auth-demo" id="api-setup-notice" style="display:none">
+            <p><strong>Netlify setup:</strong> Add <code>API_BASE_URL</code> = your Render URL + <code>/api</code>, then redeploy. Keep <code>MONGODB_URI</code> on Render only.</p>
+          </div>
           <div class="auth-demo">
             <p><strong>Demo:</strong> admin@company.com / admin123</p>
           </div>
@@ -125,6 +128,10 @@ const AuthPage = {
   },
 
   bindLogin() {
+    if (window.APP_CONFIG?.apiConfigured === false) {
+      const notice = document.getElementById('api-setup-notice');
+      if (notice) notice.style.display = 'block';
+    }
     document.getElementById('login-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;

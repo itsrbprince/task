@@ -1,96 +1,87 @@
 # Deploy TaskPerform on Netlify
 
-## Why you saw 404
+## Important: two separate deployments
 
-Netlify only hosts **static files**. `/api/auth/login` does not exist unless you:
+| Platform | What runs there | Environment variables |
+|----------|-----------------|---------------------|
+| **Netlify** | Frontend only (`public/`) | **`API_BASE_URL`** only |
+| **Render** | Express API + MongoDB connection | `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV`, `CLIENT_URL` |
 
-1. Deploy the **Express API** elsewhere (Render), and  
-2. Tell Netlify where the API is via an **environment variable** + **redeploy**
+Do **not** put `MONGODB_URI` or `JWT_SECRET` on Netlify — they only work on Render.
 
 ---
 
-## Step-by-step fix
+## Fix your failed build
 
-### 1. Deploy API on Render (if not done)
+Your log shows Netlify has `MONGODB_URI`, `JWT_SECRET`, etc. but **not** `API_BASE_URL`.
 
-1. [render.com](https://render.com) → **New Web Service** → connect GitHub repo  
-2. **Build command:** `npm install`  
-3. **Start command:** `npm start`  
-4. **Environment variables:**
+### Step 1 — Netlify environment variables
+
+**Remove from Netlify** (optional, they are ignored):
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `JWT_EXPIRE`
+- `PORT`
+
+**Add on Netlify** (required):
 
 | Key | Value |
 |-----|--------|
-| `MONGODB_URI` | Your MongoDB Atlas connection string |
-| `JWT_SECRET` | Random secret string |
+| `API_BASE_URL` | `https://YOUR-SERVICE.onrender.com/api` |
+
+Example: `https://taskperform-api.onrender.com/api`
+
+Scope: **All** (Production + Deploy previews)
+
+### Step 2 — Deploy API on Render (if not done)
+
+1. [render.com](https://render.com) → **New Web Service** → your GitHub repo  
+2. Build: `npm install` · Start: `npm start`  
+3. **Render** environment variables:
+
+| Key | Value |
+|-----|--------|
+| `MONGODB_URI` | Atlas connection string |
+| `JWT_SECRET` | random secret |
 | `NODE_ENV` | `production` |
 | `CLIENT_URL` | `https://charming-froyo-84b93d.netlify.app` |
 
-5. Deploy and test: open  
-   `https://YOUR-SERVICE.onrender.com/api/health`  
-   You must see: `{"success":true,"message":"Task Performance API is running"}`
+4. Test: `https://YOUR-SERVICE.onrender.com/api/health` → JSON success
 
-### 2. Configure Netlify (required)
+### Step 3 — Redeploy Netlify
 
-**Netlify → Site configuration → Environment variables → Add variable**
+**Deploys → Trigger deploy**
 
-Use **one** of these (recommended: `API_BASE_URL`):
+Build log should show:
+```
+✓ Direct API (API_BASE_URL): https://your-api.onrender.com/api
+```
 
-| Key | Value example |
-|-----|----------------|
-| **`API_BASE_URL`** | `https://YOUR-SERVICE.onrender.com/api` |
+---
+
+## Alternative: proxy mode
+
+Instead of `API_BASE_URL`, you can use:
+
+| Key | Value |
+|-----|--------|
 | `API_PROXY_TARGET` | `https://YOUR-SERVICE.onrender.com` |
 
-- No trailing slash on the host  
-- Scope: **All** (Production + Deploy previews)
-
-### 3. Redeploy Netlify
-
-**Deploys → Trigger deploy → Deploy site**
-
-The build **will fail** if neither env var is set (this prevents broken 404 deploys).
-
-After success, check deploy log for:
-```
-✓ Direct API: https://your-api.onrender.com/api
-```
-
-### 4. Test login
-
-Open `https://charming-froyo-84b93d.netlify.app` and sign in.
-
-In DevTools → Network, login should go to either:
-- `https://YOUR-SERVICE.onrender.com/api/auth/login` (direct), or  
-- `https://charming-froyo-84b93d.netlify.app/api/auth/login` (proxy → Render)
+(no `/api` suffix)
 
 ---
 
-## Quick checklist
+## Verify
 
-| Check | Expected |
-|-------|----------|
-| Render `/api/health` | JSON success |
-| Netlify env `API_BASE_URL` set | Yes |
-| Netlify deploy | Build succeeded (not failed) |
-| Render `CLIENT_URL` | Your Netlify URL |
-| MongoDB Atlas | Network access allows `0.0.0.0/0` |
-
----
-
-## Still 404?
-
-1. **Build failed on Netlify** → add `API_BASE_URL` and redeploy  
-2. **Only uploaded `public/` folder** → connect **full Git repo** instead  
-3. **Render URL wrong** → copy exact URL from Render dashboard  
-4. **No Render service** → API must run on Render; Netlify alone cannot run Express  
+1. Netlify build **succeeds**  
+2. Login request goes to `https://YOUR-SERVICE.onrender.com/api/auth/login`  
+3. Not 404 on Netlify domain for API (unless using proxy mode)
 
 ---
 
 ## Local development
 
 ```bash
-npm install
-npm run seed   # needs MongoDB
-npm run dev    # http://localhost:5000
+npm run dev
+# Uses /api on localhost — no Netlify env vars needed
 ```
-
-No Netlify env vars needed locally.

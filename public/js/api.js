@@ -24,6 +24,11 @@ const API = {
   },
 
   async request(endpoint, options = {}) {
+    if (window.APP_CONFIG?.apiConfigured === false || !this.baseURL) {
+      throw new Error(
+        'API not configured. In Netlify → Environment variables, set API_BASE_URL to your Render API (e.g. https://your-app.onrender.com/api), then redeploy. MONGODB_URI and JWT_SECRET belong on Render, not Netlify.'
+      );
+    }
     const url = `${this.baseURL}${endpoint}`;
     const headers = { ...options.headers };
 
