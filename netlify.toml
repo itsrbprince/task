@@ -1,5 +1,5 @@
-# Netlify — frontend (SPA) deployment
-# Backend (Express + MongoDB) must run separately — see NETLIFY.md (Render recommended)
+# Netlify — frontend + serverless API proxy
+# Backend (Express + MongoDB) runs on Render/Railway — see NETLIFY.md
 
 [build]
   publish = "public"
@@ -8,4 +8,19 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# API proxy + SPA rules are written to public/_redirects by npm run build:netlify
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Proxy all API calls to the Netlify function (uses API_PROXY_TARGET at runtime)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

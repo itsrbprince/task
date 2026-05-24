@@ -5,5 +5,5 @@ uploads/*
 .DS_Store
 *.log
 
-# Generated on Netlify build (committed defaults exist for local dev)
-public/_redirects
+# Generated on Netlify build (config.js); _redirects is committed
+public/js/config.js

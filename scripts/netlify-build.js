@@ -1,9 +1,6 @@
 /**
- * Netlify build: inject API URL + optional /api proxy to backend.
- *
- * Netlify env vars:
- *   API_PROXY_TARGET  — e.g. https://your-api.onrender.com (uses same-origin /api)
- *   API_BASE_URL      — e.g. https://your-api.onrender.com/api (direct calls + CORS)
+ * Netlify build: writes frontend API config.
+ * /api/* is proxied by netlify/functions/api.js using API_PROXY_TARGET (runtime env).
  */
 const fs = require('fs');
 const path = require('path');
@@ -12,11 +9,13 @@ const publicDir = path.join(__dirname, '../public');
 const apiProxy = process.env.API_PROXY_TARGET?.replace(/\/$/, '');
 
 let apiBaseURL = '/api';
-if (apiProxy) {
-  apiBaseURL = '/api';
-} else if (process.env.API_BASE_URL) {
+
+if (!apiProxy && process.env.API_BASE_URL) {
   apiBaseURL = process.env.API_BASE_URL.replace(/\/$/, '');
   if (!apiBaseURL.endsWith('/api')) apiBaseURL = `${apiBaseURL}/api`;
+  console.log(`Netlify: direct API → ${apiBaseURL}`);
+} else {
+  console.log('Netlify: using /api proxy function (set API_PROXY_TARGET in Netlify env)');
 }
 
 fs.writeFileSync(
@@ -28,13 +27,4 @@ window.APP_CONFIG = {
 `
 );
 
-let redirects = '/*    /index.html   200\n';
-if (apiProxy) {
-  redirects = `/api/*  ${apiProxy}/api/:splat  200\n${redirects}`;
-  console.log(`Netlify: proxy /api → ${apiProxy}`);
-} else {
-  console.log(`Netlify: API → ${apiBaseURL}`);
-}
-
-fs.writeFileSync(path.join(publicDir, '_redirects'), redirects);
 console.log('Netlify build complete.');

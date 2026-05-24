@@ -51,7 +51,21 @@ This app has two parts:
 
 ## 3. Deploy frontend to Netlify
 
-### Option A — Netlify UI (recommended)
+### Required: set backend URL on Netlify
+
+After your API is live on Render, open **Netlify → Site configuration → Environment variables** and add:
+
+| Key | Value | Scope |
+|-----|--------|--------|
+| `API_PROXY_TARGET` | `https://YOUR-API.onrender.com` | All (Production + Deploy previews) |
+
+**No trailing slash.** Example: `https://taskperform-api.onrender.com`
+
+Then **Trigger deploy → Deploy site** (required after adding env vars).
+
+The site uses a **Netlify Function** (`netlify/functions/api.js`) to forward `/api/*` to your backend. You do **not** need to rebuild when only changing the backend URL — but you **must redeploy** once after setting the variable.
+
+### Option A — Netlify UI
 
 1. [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import from Git**.
 2. Select the repo.
@@ -62,23 +76,9 @@ This app has two parts:
    | Build command | `npm run build:netlify` |
    | Publish directory | `public` |
 
-4. **Site configuration → Environment variables** (choose one):
+4. Add **`API_PROXY_TARGET`** (see “Required” section above).
 
-   **Proxy (same-origin `/api`, simpler CORS):**
-
-   | Key | Value |
-   |-----|--------|
-   | `API_PROXY_TARGET` | `https://taskperform-api.onrender.com` |
-
-   **Direct API URL:**
-
-   | Key | Value |
-   |-----|--------|
-   | `API_BASE_URL` | `https://taskperform-api.onrender.com/api` |
-
-5. **Deploy site**.
-
-6. Copy Netlify URL → update Render `CLIENT_URL` to that URL → redeploy API.
+5. **Deploy site**, then update Render **`CLIENT_URL`** to your Netlify URL and redeploy the API.
 
 ### Option B — Netlify CLI
 
@@ -104,9 +104,9 @@ netlify deploy --prod
 
 | File | Purpose |
 |------|---------|
-| `netlify.toml` | Build & publish settings |
-| `scripts/netlify-build.js` | Injects `public/js/config.js` + `public/_redirects` |
-| `public/js/config.js` | API base URL (local default `/api`) |
+| `netlify.toml` | Build, redirects, functions config |
+| `netlify/functions/api.js` | Proxies `/api/*` → Render backend |
+| `scripts/netlify-build.js` | Writes `public/js/config.js` |
 | `render.yaml` | Optional Render blueprint for API |
 
 ---
@@ -115,10 +115,10 @@ netlify deploy --prod
 
 | Issue | Fix |
 |-------|-----|
-| API 404 on Netlify | Set `API_PROXY_TARGET` and redeploy; or set `API_BASE_URL` |
-| CORS errors | Set `CLIENT_URL` on Render to exact Netlify URL (no trailing slash) |
-| Login works locally, not on Netlify | MongoDB Atlas IP allowlist; check Render logs |
-| File uploads fail | API must be on Render (not Netlify); uploads live on Render disk (ephemeral on free tier — use S3 for production) |
+| **`POST /api/auth/login` → 404** | Push latest code (includes API proxy function), set `API_PROXY_TARGET` on Netlify, **redeploy** |
+| API 502 / “Backend unreachable” | Render API is down or wrong `API_PROXY_TARGET` URL |
+| API 503 / “API not configured” | Add `API_PROXY_TARGET` in Netlify env and redeploy |
+| CORS errors | Set `CLIENT_URL=https://charming-froyo-84b93d.netlify.app` on Render |
 
 ---
 
