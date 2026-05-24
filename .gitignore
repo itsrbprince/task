@@ -4,3 +4,6 @@ uploads/*
 .env
 .DS_Store
 *.log
+
+# Generated on Netlify build (committed defaults exist for local dev)
+public/_redirects

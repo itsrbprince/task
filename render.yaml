@@ -1,0 +1,21 @@
+# Deploy API to Render: https://render.com
+# Connect repo → New Web Service → use this blueprint or manual settings below.
+
+services:
+  - type: web
+    name: taskperform-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: CLIENT_URL
+        sync: false

@@ -313,7 +313,7 @@ const TaskDetailPage = {
 
   async downloadFile(filename, originalName) {
     try {
-      const res = await fetch(`/api/tasks/uploads/${filename}`, {
+      const res = await fetch(`${API.baseURL}/tasks/uploads/${filename}`, {
         headers: API.tasks.getDownloadHeaders(),
       });
       if (!res.ok) throw new Error('Download failed');

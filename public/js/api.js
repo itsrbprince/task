@@ -1,5 +1,8 @@
 const API = {
-  baseURL: '/api',
+  get baseURL() {
+    const url = window.APP_CONFIG?.apiBaseURL || '/api';
+    return url.endsWith('/api') ? url : `${url.replace(/\/$/, '')}/api`;
+  },
 
   getToken() {
     return localStorage.getItem('token');

@@ -1,0 +1,11 @@
+# Netlify — frontend (SPA) deployment
+# Backend (Express + MongoDB) must run separately — see NETLIFY.md (Render recommended)
+
+[build]
+  publish = "public"
+  command = "npm run build:netlify"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# API proxy + SPA rules are written to public/_redirects by npm run build:netlify

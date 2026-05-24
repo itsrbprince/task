@@ -127,6 +127,18 @@ npm start
 
 Open **http://localhost:5000** in your browser.
 
+## Deploy to Netlify
+
+The frontend deploys to **Netlify**; the API should run on **Render** (or similar) with **MongoDB Atlas**.
+
+See **[NETLIFY.md](./NETLIFY.md)** for step-by-step instructions.
+
+Quick Netlify env var (after API is on Render):
+
+```
+API_PROXY_TARGET=https://your-api.onrender.com
+```
+
 ## API Routes
 
 ### Authentication

@@ -13,7 +13,24 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+const corsOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.NETLIFY_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || corsOrigins.length === 0) return callback(null, true);
+      if (corsOrigins.some((o) => origin === o || origin.endsWith('.netlify.app'))) {
+        return callback(null, true);
+      }
+      callback(null, true);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
