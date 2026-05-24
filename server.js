@@ -22,8 +22,10 @@ const corsOrigins = [
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || corsOrigins.length === 0) return callback(null, true);
-      if (corsOrigins.some((o) => origin === o || origin.endsWith('.netlify.app'))) {
+      if (!origin) return callback(null, true);
+      if (/\.netlify\.app$/i.test(origin)) return callback(null, true);
+      if (corsOrigins.some((o) => origin === o)) return callback(null, true);
+      if (corsOrigins.length === 0 || process.env.NODE_ENV !== 'production') {
         return callback(null, true);
       }
       callback(null, true);

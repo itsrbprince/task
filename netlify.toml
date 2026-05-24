@@ -1,5 +1,5 @@
-# Netlify — frontend + serverless API proxy
-# Backend (Express + MongoDB) runs on Render/Railway — see NETLIFY.md
+# Netlify frontend — see NETLIFY.md
+# Redirects are generated into public/_redirects at build time (API proxy + SPA)
 
 [build]
   publish = "public"
@@ -7,20 +7,3 @@
 
 [build.environment]
   NODE_VERSION = "20"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-# Proxy all API calls to the Netlify function (uses API_PROXY_TARGET at runtime)
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
-
-# SPA fallback
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

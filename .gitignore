@@ -1,9 +1,8 @@
 node_modules/
 uploads/*
 !uploads/.gitkeep
-.env
 .DS_Store
 *.log
 
-# Generated on Netlify build (config.js); _redirects is committed
-public/js/config.js
+# Generated at build time on Netlify
+public/_redirects

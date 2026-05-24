@@ -1,2 +1,1 @@
-# SPA fallback only — /api/* is handled in netlify.toml → Netlify Function
 /*    /index.html   200
