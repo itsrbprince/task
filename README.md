@@ -9,6 +9,9 @@ A full-stack enterprise task and performance management platform built with **No
 - Role-based authentication (Admin / Employee) with JWT
 - Admin dashboard with overview, employees, departments, and leaderboard
 - Multi-file uploads (drag & drop) with secure authenticated downloads
+- Sub-tasks, multiple URLs, optional daily goals with auto performance evaluation
+- Forgot / reset password and change password (in-app settings)
+- Light professional white theme UI
 - Task detail viewer with comments and attachments
 - Responsive professional enterprise UI
 
@@ -132,6 +135,9 @@ Open **http://localhost:5000** in your browser.
 | ------ | ------------------ | ------------------ |
 | POST   | `/api/auth/register` | Register user    |
 | POST   | `/api/auth/login`    | Login            |
+| POST   | `/api/auth/forgot-password` | Request password reset |
+| POST   | `/api/auth/reset-password`  | Reset with token |
+| PUT    | `/api/auth/change-password` | Change password (JWT) |
 | GET    | `/api/auth/me`       | Current user (JWT) |
 | GET    | `/api/auth/employees`| List employees (JWT) |
 
