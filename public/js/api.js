@@ -1,7 +1,6 @@
 const API = {
   get baseURL() {
-    const url = window.APP_CONFIG?.apiBaseURL || '/api';
-    return url.endsWith('/api') ? url : `${url.replace(/\/$/, '')}/api`;
+    return 'https://your-render-url.onrender.com/api';
   },
 
   getToken() {
@@ -24,11 +23,6 @@ const API = {
   },
 
   async request(endpoint, options = {}) {
-    if (window.APP_CONFIG?.apiConfigured === false || !this.baseURL) {
-      throw new Error(
-        'API not configured. In Netlify → Environment variables, set API_BASE_URL to your Render API (e.g. https://your-app.onrender.com/api), then redeploy. MONGODB_URI and JWT_SECRET belong on Render, not Netlify.'
-      );
-    }
     const url = `${this.baseURL}${endpoint}`;
     const headers = { ...options.headers };
 
@@ -37,7 +31,10 @@ const API = {
     }
 
     const token = this.getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const config = {
       ...options,
@@ -51,6 +48,7 @@ const API = {
     };
 
     const response = await fetch(url, config);
+
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
@@ -59,6 +57,7 @@ const API = {
         this.setUser(null);
         window.location.hash = '#/login';
       }
+
       throw new Error(data.message || 'Request failed');
     }
 
@@ -67,33 +66,65 @@ const API = {
 
   auth: {
     login: (body) => API.request('/auth/login', { method: 'POST', body }),
-    register: (body) => API.request('/auth/register', { method: 'POST', body }),
-    forgotPassword: (body) => API.request('/auth/forgot-password', { method: 'POST', body }),
-    resetPassword: (body) => API.request('/auth/reset-password', { method: 'POST', body }),
-    changePassword: (body) => API.request('/auth/change-password', { method: 'PUT', body }),
+
+    register: (body) =>
+      API.request('/auth/register', { method: 'POST', body }),
+
+    forgotPassword: (body) =>
+      API.request('/auth/forgot-password', { method: 'POST', body }),
+
+    resetPassword: (body) =>
+      API.request('/auth/reset-password', { method: 'POST', body }),
+
+    changePassword: (body) =>
+      API.request('/auth/change-password', { method: 'PUT', body }),
+
     getMe: () => API.request('/auth/me'),
+
     getEmployees: () => API.request('/auth/employees'),
   },
 
   tasks: {
     list: (params = {}) => {
       const query = new URLSearchParams(params).toString();
+
       return API.request(`/tasks${query ? `?${query}` : ''}`);
     },
+
     get: (id) => API.request(`/tasks/${id}`),
-    create: (body) => API.request('/tasks', { method: 'POST', body }),
-    update: (id, body) => API.request(`/tasks/${id}`, { method: 'PUT', body }),
-    delete: (id) => API.request(`/tasks/${id}`, { method: 'DELETE' }),
+
+    create: (body) =>
+      API.request('/tasks', { method: 'POST', body }),
+
+    update: (id, body) =>
+      API.request(`/tasks/${id}`, { method: 'PUT', body }),
+
+    delete: (id) =>
+      API.request(`/tasks/${id}`, { method: 'DELETE' }),
+
     addComment: (id, text) =>
-      API.request(`/tasks/${id}/comments`, { method: 'POST', body: { text } }),
+      API.request(`/tasks/${id}/comments`, {
+        method: 'POST',
+        body: { text },
+      }),
+
     uploadAttachments: (id, formData) =>
-      API.request(`/tasks/${id}/attachments`, { method: 'POST', body: formData }),
+      API.request(`/tasks/${id}/attachments`, {
+        method: 'POST',
+        body: formData,
+      }),
+
     deleteAttachment: (id, attachmentId) =>
-      API.request(`/tasks/${id}/attachments/${attachmentId}`, { method: 'DELETE' }),
+      API.request(`/tasks/${id}/attachments/${attachmentId}`, {
+        method: 'DELETE',
+      }),
+
     downloadUrl: (filename) => {
       const token = API.getToken();
+
       return `${API.baseURL}/tasks/uploads/${filename}?token=${token}`;
     },
+
     getDownloadHeaders: () => ({
       Authorization: `Bearer ${API.getToken()}`,
     }),
@@ -101,12 +132,17 @@ const API = {
 
   admin: {
     overview: () => API.request('/admin/overview'),
+
     employees: (params = {}) => {
       const query = new URLSearchParams(params).toString();
+
       return API.request(`/admin/employees${query ? `?${query}` : ''}`);
     },
+
     employee: (id) => API.request(`/admin/employees/${id}`),
+
     departments: () => API.request('/admin/departments'),
+
     leaderboard: () => API.request('/admin/leaderboard'),
   },
 };

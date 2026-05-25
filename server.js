@@ -10,43 +10,18 @@ const { errorHandler } = require('./src/utils/errors');
 const authRoutes = require('./src/routes/authRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
-const PORT = process.env.PORT || 5000;
 
 const app = express();
+
+const PORT = process.env.PORT || 5000;
 
 // Connect Database
 connectDB();
 
 // CORS Configuration
-const corsOrigins = [
-  process.env.CLIENT_URL,
-  process.env.FRONTEND_URL,
-  process.env.NETLIFY_URL,
-].filter(Boolean);
-
 app.use(
   cors({
-    origin(origin, callback) {
-      // Allow requests with no origin
-      if (!origin) return callback(null, true);
-
-      // Allow Netlify domains
-      if (/\.netlify\.app$/i.test(origin)) {
-        return callback(null, true);
-      }
-
-      // Allow configured origins
-      if (corsOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // Allow all in development
-      if (process.env.NODE_ENV !== 'production') {
-        return callback(null, true);
-      }
-
-      return callback(new Error('Not allowed by CORS'));
-    },
+    origin: '*',
     credentials: true,
   })
 );
@@ -73,7 +48,6 @@ app.get('/api/health', (req, res) => {
 
 // Frontend Route
 app.get('*', (req, res) => {
-  // Prevent API 404 issue
   if (req.path.startsWith('/api')) {
     return res.status(404).json({
       success: false,
@@ -87,8 +61,8 @@ app.get('*', (req, res) => {
 // Error Handler
 app.use(errorHandler);
 
-// IMPORTANT FOR VERCEL
-
+// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
