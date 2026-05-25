@@ -10,6 +10,7 @@ const { errorHandler } = require('./src/utils/errors');
 const authRoutes = require('./src/routes/authRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 
@@ -87,4 +88,7 @@ app.get('*', (req, res) => {
 app.use(errorHandler);
 
 // IMPORTANT FOR VERCEL
-module.exports = app;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
